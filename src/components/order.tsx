@@ -14,6 +14,9 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { pricing } from '@/constants/pricing'
 
+const ALLY_AVATAR_URL = 'https://i.postimg.cc/QMbNn12c/Image.png'
+const NON_ALLY_AVATAR_URL = 'https://i.postimg.cc/GhWpBcPT/image2.png'
+
 export function Order() {
   const [orderGangName, setOrderGangName] = useState('')
   const [orderDate, setOrderDate] = useState(
@@ -53,17 +56,27 @@ export function Order() {
     const total = calculateOrderTotal()
     const formattedDate = formatBrazilianDate(orderDate)
 
-    let message = `🧾 Encomenda: ${orderGangName}
-📅 Data: ${formattedDate}
-`
+    let intro = ''
+    if (orderBuyerType === 'ally') {
+      intro =
+        'presso d migos pros meu migos amigoes PARSEIROs e MIGos 😁 😋 🫶 🫶 🫶 😚 🤝 😁'
+    } else {
+      intro =
+        'odeio esses caba 👿👿👿👿  ai ficar esse presso aqi ok #lucramo famlha 😁  #bjs #vamosfasertodososcoleteseemtregarfamila 😋'
+    }
 
-    if (orderColeteQty > 0) message += `🛡️ ${orderColeteQty}x Colete(s)\n`
-    if (orderTrojanQty > 0) message += `💣 ${orderTrojanQty}x Trojan(s)\n`
+    let msg = `${intro}\n\n`
+    msg += '```md\n'
+    msg += `🧾 Encomenda: ${orderGangName}\n`
+    msg += `📅 Data: ${formattedDate}\n`
+    if (orderColeteQty > 0) msg += `🛡️ ${orderColeteQty}x Colete(s)\n`
+    if (orderTrojanQty > 0) msg += `💣 ${orderTrojanQty}x Trojan(s)\n`
+    msg += `\n💰 Total: ${formatCurrency(total)}`
+    if (orderBuyerType === 'ally') msg += ' (mimos d ally 😋)'
+    else msg += ' (n é d casa n tem mimo 😼)'
+    msg += '\n```'
 
-    message += `\n💰 Total: ${formatCurrency(total)}`
-    if (orderBuyerType === 'ally') message += ` (Preço de aliado 🤝)`
-
-    return '```md\n' + message + '\n```'
+    return msg
   }
 
   const handleSubmitOrder = async () => {
@@ -90,10 +103,16 @@ export function Order() {
       const message = generateOrderMessage()
       setOrderMessage(message)
 
+      const avatarUrl =
+        orderBuyerType === 'ally' ? ALLY_AVATAR_URL : NON_ALLY_AVATAR_URL
+
       const response = await fetch(webhookUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ content: message }),
+        body: JSON.stringify({
+          avatar_url: avatarUrl,
+          content: message,
+        }),
       })
 
       if (response.ok) {
@@ -116,7 +135,6 @@ export function Order() {
   return (
     <>
       <div className="grid lg:grid-cols-2 gap-6">
-        {/* Card da Encomenda */}
         <Card className="bg-gray-800/50 border-gray-700 backdrop-blur-sm">
           <CardHeader>
             <CardTitle className="text-white flex items-center space-x-2">
