@@ -12,7 +12,17 @@ import {
 } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
+import { gangs } from '@/constants/gangs'
+import { allyMessages, nonAllyMessages } from '@/constants/katarina'
 import { pricing } from '@/constants/pricing'
+import { getRandomElement } from '@/utils/get-random-element'
 
 export function Order() {
   const [orderGangName, setOrderGangName] = useState('')
@@ -59,12 +69,21 @@ export function Order() {
     const formattedDate = formatBrazilianDate(orderDate)
 
     let intro = ''
+
     if (orderBuyerType === 'ally') {
-      intro =
-        'presso d migos pros meu migos amigoes PARSEIROs e MIGos 😁 😋 🫶 🫶 🫶 😚 🤝 😁'
+      const intros = [
+        ...allyMessages[0].all,
+        ...(orderColeteQty > 0 ? allyMessages[0].colete : []),
+        ...(orderTrojanQty > 0 ? allyMessages[0].pendrive : []),
+      ]
+      intro = getRandomElement(intros)
     } else {
-      intro =
-        'odeio esses caba 👿👿👿👿  ai ficar esse presso aqi ok #lucramo famlha 😁  #bjs #vamosfasertodososcoleteseemtregarfamila 😋'
+      const intros = [
+        ...nonAllyMessages[0].all,
+        ...(orderColeteQty > 0 ? nonAllyMessages[0].colete : []),
+        ...(orderTrojanQty > 0 ? nonAllyMessages[0].pendrive : []),
+      ]
+      intro = getRandomElement(intros)
     }
 
     let msg = `${intro}\n\n`
@@ -150,14 +169,21 @@ export function Order() {
               <Label htmlFor="gangName" className="text-white font-medium">
                 Nome da Gang
               </Label>
-              <Input
-                id="gangName"
-                type="text"
+              <Select
                 value={orderGangName}
-                onChange={(e) => setOrderGangName(e.target.value)}
-                placeholder="Ex: Black Eagles"
-                className="bg-gray-700/50 border-gray-600 text-white placeholder:text-gray-400"
-              />
+                onValueChange={(value) => setOrderGangName(value)}
+              >
+                <SelectTrigger className="bg-gray-700/50 border-gray-600 text-white w-full">
+                  <SelectValue placeholder="Selecione uma gang" />
+                </SelectTrigger>
+                <SelectContent className="bg-gray-800 text-white border-gray-600">
+                  {Object.entries(gangs).map(([key, label]) => (
+                    <SelectItem key={key} value={label} className="capitalize">
+                      {label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
 
             <div className="space-y-2">
@@ -312,7 +338,7 @@ export function Order() {
 
             {orderColeteQty + orderTrojanQty > 0 && orderGangName.trim() && (
               <div className="bg-gray-900/40 p-4 rounded-lg border border-gray-700/50 font-mono text-sm text-gray-300 whitespace-pre-line">
-                {generateOrderMessage()}
+                A mensagem surpresa será revelada após o envio 😉
               </div>
             )}
 

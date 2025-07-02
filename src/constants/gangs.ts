@@ -1,0 +1,16 @@
+export const gangs: { [key: string]: string } = {
+  lost: 'The Lost',
+  angels: 'Angels of Death',
+  'santa muerte': 'La Santa Muerte',
+  insanos: 'Insanos',
+  'black eagles': 'Black Eagles',
+  infamous: 'Infamous',
+  ballas: 'Ballas',
+  '18block': '18Block',
+  hustlers: 'Hustlers',
+  'black rose': 'Black Rose',
+  cesarini: 'Cesarini',
+  madrazo: 'Madrazo',
+  vitale: 'Vitale',
+  saints: 'Saints',
+}
