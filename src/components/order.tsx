@@ -14,9 +14,6 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { pricing } from '@/constants/pricing'
 
-const ALLY_AVATAR_URL = 'https://i.postimg.cc/QMbNn12c/Image.png'
-const NON_ALLY_AVATAR_URL = 'https://i.postimg.cc/GhWpBcPT/image2.png'
-
 export function Order() {
   const [orderGangName, setOrderGangName] = useState('')
   const [orderDate, setOrderDate] = useState(
@@ -30,7 +27,12 @@ export function Order() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [orderMessage, setOrderMessage] = useState('')
 
-  const webhookUrl = process.env.NEXT_PUBLIC_DISCORD_WEBHOOK_URL || ''
+  const webhookUrlAlly = process.env.NEXT_PUBLIC_DISCORD_WEBHOOK_ALLY || ''
+  const webhookUrlNonAlly =
+    process.env.NEXT_PUBLIC_DISCORD_WEBHOOK_NONALLY || ''
+
+  const getWebhookUrl = () =>
+    orderBuyerType === 'ally' ? webhookUrlAlly : webhookUrlNonAlly
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-US', {
@@ -90,29 +92,26 @@ export function Order() {
       return
     }
 
-    if (!webhookUrl) {
+    const selectedWebhookUrl = getWebhookUrl()
+
+    if (!selectedWebhookUrl) {
       toast.error(
-        'Webhook do Discord não configurado. Verifique o arquivo .env.',
+        `Webhook do Discord para ${
+          orderBuyerType === 'ally' ? 'aliados' : 'não aliados'
+        } não configurado. Verifique o arquivo .env.`,
       )
       return
     }
-
     setIsSubmitting(true)
 
     try {
       const message = generateOrderMessage()
       setOrderMessage(message)
 
-      const avatarUrl =
-        orderBuyerType === 'ally' ? ALLY_AVATAR_URL : NON_ALLY_AVATAR_URL
-
-      const response = await fetch(webhookUrl, {
+      const response = await fetch(selectedWebhookUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          avatar_url: avatarUrl,
-          content: message,
-        }),
+        body: JSON.stringify({ content: message }),
       })
 
       if (response.ok) {
@@ -135,6 +134,7 @@ export function Order() {
   return (
     <>
       <div className="grid lg:grid-cols-2 gap-6">
+        {/* Card da Encomenda */}
         <Card className="bg-gray-800/50 border-gray-700 backdrop-blur-sm">
           <CardHeader>
             <CardTitle className="text-white flex items-center space-x-2">
