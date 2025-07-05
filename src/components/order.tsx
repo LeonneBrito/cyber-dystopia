@@ -31,9 +31,9 @@ export function Order() {
   )
   const [orderColeteQty, setOrderColeteQty] = useState(0)
   const [orderTrojanQty, setOrderTrojanQty] = useState(0)
-  const [orderBuyerType, setOrderBuyerType] = useState<'ally' | 'nonAlly'>(
-    'ally',
-  )
+  const [orderBuyerType, setOrderBuyerType] = useState<
+    'ally' | 'nonAlly' | 'roupas'
+  >('ally')
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [orderMessage, setOrderMessage] = useState('')
 
@@ -42,7 +42,7 @@ export function Order() {
     process.env.NEXT_PUBLIC_DISCORD_WEBHOOK_NONALLY || ''
 
   const getWebhookUrl = () =>
-    orderBuyerType === 'ally' ? webhookUrlAlly : webhookUrlNonAlly
+    orderBuyerType === 'nonAlly' ? webhookUrlNonAlly : webhookUrlAlly
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-US', {
@@ -57,20 +57,23 @@ export function Order() {
   }
 
   const calculateOrderTotal = () => {
-    const coletePrice =
-      orderBuyerType === 'ally' ? pricing.COLETE.ally : pricing.COLETE.nonAlly
-    const trojanPrice =
-      orderBuyerType === 'ally' ? pricing.TROJAN.ally : pricing.TROJAN.nonAlly
+    const isAllyType = orderBuyerType !== 'nonAlly'
+    const coletePrice = isAllyType
+      ? pricing.COLETE.ally
+      : pricing.COLETE.nonAlly
+    const trojanPrice = isAllyType
+      ? pricing.TROJAN.ally
+      : pricing.TROJAN.nonAlly
     return orderColeteQty * coletePrice + orderTrojanQty * trojanPrice
   }
-
   const generateOrderMessage = () => {
     const total = calculateOrderTotal()
     const formattedDate = formatBrazilianDate(orderDate)
 
     let intro = ''
+    const isAllyType = orderBuyerType !== 'nonAlly'
 
-    if (orderBuyerType === 'ally') {
+    if (isAllyType) {
       const intros = [
         ...allyMessages[0].all,
         ...(orderColeteQty > 0 ? allyMessages[0].colete : []),
@@ -94,6 +97,8 @@ export function Order() {
     if (orderTrojanQty > 0) msg += `💣 ${orderTrojanQty}x Trojan(s)\n`
     msg += `\n💰 Total: ${formatCurrency(total)}`
     if (orderBuyerType === 'ally') msg += ' (mimos d ally 😋)'
+    else if (orderBuyerType === 'roupas')
+      msg += ' (ganhou mimos pq deu roupas 👕)'
     else msg += ' (n é d casa n tem mimo 😼)'
     msg += '\n```'
 
@@ -234,38 +239,52 @@ export function Order() {
               </div>
             </div>
 
-            <div className="space-y-2">
-              <Label className="text-white font-medium">
-                Tipo de Comprador
-              </Label>
-              <div className="flex space-x-4">
-                <label className="flex items-center space-x-2 cursor-pointer">
-                  <input
-                    type="radio"
-                    name="buyerType"
-                    value="ally"
-                    checked={orderBuyerType === 'ally'}
-                    onChange={(e) =>
-                      setOrderBuyerType(e.target.value as 'ally' | 'nonAlly')
-                    }
-                    className="text-green-500"
-                  />
-                  <span className="text-green-400">Aliado</span>
-                </label>
-                <label className="flex items-center space-x-2 cursor-pointer">
-                  <input
-                    type="radio"
-                    name="buyerType"
-                    value="nonAlly"
-                    checked={orderBuyerType === 'nonAlly'}
-                    onChange={(e) =>
-                      setOrderBuyerType(e.target.value as 'ally' | 'nonAlly')
-                    }
-                    className="text-red-500"
-                  />
-                  <span className="text-red-400">Não-Aliado</span>
-                </label>
-              </div>
+            <div className="flex space-x-4">
+              <label className="flex items-center space-x-2 cursor-pointer">
+                <input
+                  type="radio"
+                  name="buyerType"
+                  value="ally"
+                  checked={orderBuyerType === 'ally'}
+                  onChange={(e) =>
+                    setOrderBuyerType(
+                      e.target.value as 'ally' | 'nonAlly' | 'roupas',
+                    )
+                  }
+                  className="text-green-500"
+                />
+                <span className="text-green-400">Aliado</span>
+              </label>
+              <label className="flex items-center space-x-2 cursor-pointer">
+                <input
+                  type="radio"
+                  name="buyerType"
+                  value="nonAlly"
+                  checked={orderBuyerType === 'nonAlly'}
+                  onChange={(e) =>
+                    setOrderBuyerType(
+                      e.target.value as 'ally' | 'nonAlly' | 'roupas',
+                    )
+                  }
+                  className="text-red-500"
+                />
+                <span className="text-red-400">Não-Aliado</span>
+              </label>
+              <label className="flex items-center space-x-2 cursor-pointer">
+                <input
+                  type="radio"
+                  name="buyerType"
+                  value="roupas"
+                  checked={orderBuyerType === 'roupas'}
+                  onChange={(e) =>
+                    setOrderBuyerType(
+                      e.target.value as 'ally' | 'nonAlly' | 'roupas',
+                    )
+                  }
+                  className="text-yellow-500"
+                />
+                <span className="text-yellow-400">Dando Roupas</span>
+              </label>
             </div>
 
             {(orderColeteQty > 0 || orderTrojanQty > 0) && (
@@ -285,6 +304,11 @@ export function Order() {
                     {orderBuyerType === 'ally' && (
                       <span className="text-sm text-green-400 ml-2">
                         (Preço Aliado)
+                      </span>
+                    )}
+                    {orderBuyerType === 'roupas' && (
+                      <span className="text-sm text-yellow-400 ml-2">
+                        (Preço com Roupas)
                       </span>
                     )}
                   </div>
@@ -330,9 +354,9 @@ export function Order() {
                 <span className="text-green-400 font-semibold">
                   {formatCurrency(calculateOrderTotal())}
                 </span>{' '}
-                {orderBuyerType === 'ally' && (
-                  <span className="text-sm text-green-400">(Aliado 🤝)</span>
-                )}
+                <span className="text-sm text-green-400">
+                  ({orderBuyerType === 'roupas' ? 'Roupas 👕' : 'Aliado 🤝'})
+                </span>
               </div>
             </div>
 
