@@ -9,4 +9,9 @@ export const recipes = {
     rubber: 50,
     clothes: 0,
   },
+  NOTEBOOK: {
+    aluminum: 500,
+    rubber: 500,
+    clothes: 0,
+  },
 }

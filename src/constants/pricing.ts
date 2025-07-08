@@ -7,4 +7,8 @@ export const pricing = {
     ally: 3000,
     nonAlly: 3500,
   },
+  NOTEBOOK: {
+    ally: 10000,
+    nonAlly: 12000,
+  },
 }

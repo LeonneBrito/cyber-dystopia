@@ -13,4 +13,5 @@ export const gangs: { [key: string]: string } = {
   madrazo: 'Madrazo',
   vitale: 'Vitale',
   saints: 'Saints',
+  sharkSix: 'Shark Six',
 }

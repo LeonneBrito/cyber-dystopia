@@ -31,6 +31,7 @@ export function Order() {
   )
   const [orderColeteQty, setOrderColeteQty] = useState(0)
   const [orderTrojanQty, setOrderTrojanQty] = useState(0)
+  const [orderNotebookQty, setOrderNotebookQty] = useState(0)
   const [orderBuyerType, setOrderBuyerType] = useState<
     'ally' | 'nonAlly' | 'roupas'
   >('ally')
@@ -64,8 +65,17 @@ export function Order() {
     const trojanPrice = isAllyType
       ? pricing.TROJAN.ally
       : pricing.TROJAN.nonAlly
-    return orderColeteQty * coletePrice + orderTrojanQty * trojanPrice
+    const notebookPrice = isAllyType
+      ? pricing.NOTEBOOK.ally
+      : pricing.NOTEBOOK.nonAlly
+
+    return (
+      orderColeteQty * coletePrice +
+      orderTrojanQty * trojanPrice +
+      orderNotebookQty * notebookPrice
+    )
   }
+
   const generateOrderMessage = () => {
     const total = calculateOrderTotal()
     const formattedDate = formatBrazilianDate(orderDate)
@@ -95,6 +105,7 @@ export function Order() {
     msg += `📅 Data: ${formattedDate}\n`
     if (orderColeteQty > 0) msg += `🛡️ ${orderColeteQty}x Colete(s)\n`
     if (orderTrojanQty > 0) msg += `💣 ${orderTrojanQty}x Trojan(s)\n`
+    if (orderNotebookQty > 0) msg += `💻 ${orderNotebookQty}x Notebook(s)\n`
     msg += `\n💰 Total: ${formatCurrency(total)}`
     if (orderBuyerType === 'ally') msg += ' (mimos d ally 😋)'
     else if (orderBuyerType === 'roupas')
@@ -108,11 +119,6 @@ export function Order() {
   const handleSubmitOrder = async () => {
     if (!orderGangName.trim()) {
       toast.error('Por favor, insira o nome da gang.')
-      return
-    }
-
-    if (orderColeteQty === 0 && orderTrojanQty === 0) {
-      toast.error('Por favor, insira pelo menos 1 item.')
       return
     }
 
@@ -237,6 +243,25 @@ export function Order() {
                   className="bg-gray-700/50 border-gray-600 text-white placeholder:text-gray-400"
                 />
               </div>
+              <div className="space-y-2">
+                <Label
+                  htmlFor="orderNotebook"
+                  className="text-white font-medium"
+                >
+                  Notebooks
+                </Label>
+                <Input
+                  id="orderNotebook"
+                  type="number"
+                  min="0"
+                  value={orderNotebookQty}
+                  onChange={(e) =>
+                    setOrderNotebookQty(Number(e.target.value) || 0)
+                  }
+                  placeholder="0"
+                  className="bg-gray-700/50 border-gray-600 text-white placeholder:text-gray-400"
+                />
+              </div>
             </div>
 
             <div className="flex space-x-4">
@@ -299,6 +324,9 @@ export function Order() {
                   {orderTrojanQty > 0 && (
                     <div>• {orderTrojanQty} Trojan(s)</div>
                   )}
+                  {orderNotebookQty > 0 && (
+                    <div>• {orderNotebookQty} Notebook(s)</div>
+                  )}
                   <div className="font-bold text-lg text-blue-400 pt-2 border-t border-gray-600">
                     Total: {formatCurrency(calculateOrderTotal())}
                     {orderBuyerType === 'ally' && (
@@ -344,6 +372,10 @@ export function Order() {
                   {orderColeteQty > 0 && `${orderColeteQty}x Coletes`}
                   {orderColeteQty > 0 && orderTrojanQty > 0 && ', '}
                   {orderTrojanQty > 0 && `${orderTrojanQty}x Trojans`}
+                  {orderNotebookQty > 0 &&
+                    orderColeteQty + orderTrojanQty > 0 &&
+                    ', '}
+                  {orderNotebookQty > 0 && `${orderNotebookQty}x Notebooks`}
                 </div>
               ) : (
                 <div className="text-red-400">Nenhum item selecionado</div>
@@ -368,11 +400,7 @@ export function Order() {
 
             <button
               onClick={handleSubmitOrder}
-              disabled={
-                isSubmitting ||
-                !orderGangName.trim() ||
-                (orderColeteQty === 0 && orderTrojanQty === 0)
-              }
+              disabled={isSubmitting || !orderGangName.trim()}
               className="w-full bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 disabled:from-gray-600 disabled:to-gray-700 disabled:cursor-not-allowed text-white font-medium py-3 px-4 rounded-lg transition-all duration-200 flex items-center justify-center space-x-2"
             >
               {isSubmitting ? (

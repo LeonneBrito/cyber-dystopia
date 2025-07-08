@@ -18,21 +18,32 @@ import { recipes } from '@/constants/recipes'
 export function CraftingCalculator() {
   const [coleteQuantity, setColeteQuantity] = useState(0)
   const [trojanQuantity, setTrojanQuantity] = useState(0)
+  const [notebookQuantity, setNotebookQuantity] = useState(0)
 
   const totalAluminum =
     coleteQuantity * recipes.COLETE.aluminum +
-    trojanQuantity * recipes.TROJAN.aluminum
+    trojanQuantity * recipes.TROJAN.aluminum +
+    notebookQuantity * recipes.NOTEBOOK.aluminum
+
   const totalRubber =
     coleteQuantity * recipes.COLETE.rubber +
-    trojanQuantity * recipes.TROJAN.rubber
+    trojanQuantity * recipes.TROJAN.rubber +
+    notebookQuantity * recipes.NOTEBOOK.rubber
+
   const totalClothes =
     coleteQuantity * recipes.COLETE.clothes +
-    trojanQuantity * recipes.TROJAN.clothes
+    trojanQuantity * recipes.TROJAN.clothes +
+    notebookQuantity * recipes.NOTEBOOK.clothes
+
   const allyTotal =
-    coleteQuantity * pricing.COLETE.ally + trojanQuantity * pricing.TROJAN.ally
+    coleteQuantity * pricing.COLETE.ally +
+    trojanQuantity * pricing.TROJAN.ally +
+    notebookQuantity * pricing.NOTEBOOK.ally
+
   const nonAllyTotal =
     coleteQuantity * pricing.COLETE.nonAlly +
-    trojanQuantity * pricing.TROJAN.nonAlly
+    trojanQuantity * pricing.TROJAN.nonAlly +
+    notebookQuantity * pricing.NOTEBOOK.nonAlly
 
   const handleColeteChange = (value: string) => {
     const num = Number.parseInt(value) || 0
@@ -46,6 +57,11 @@ export function CraftingCalculator() {
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-US').format(amount)
+  }
+
+  const handleNotebookChange = (value: string) => {
+    const num = Number.parseInt(value) || 0
+    setNotebookQuantity(Math.max(0, num))
   }
 
   return (
@@ -127,6 +143,40 @@ export function CraftingCalculator() {
                 </Badge>
               </div>
             </div>
+
+            <Separator className="bg-gray-700" />
+
+            <div className="space-y-3">
+              <Label htmlFor="notebook" className="text-white font-medium">
+                NOTEBOOK
+              </Label>
+              <Input
+                id="notebook"
+                type="number"
+                min="0"
+                value={notebookQuantity}
+                onChange={(e) => handleNotebookChange(e.target.value)}
+                placeholder="0"
+                className="text-lg bg-gray-700/50 border-gray-600 text-white placeholder:text-gray-400 focus:border-blue-500 focus:ring-blue-500"
+              />
+              <div className="text-sm text-gray-400 bg-gray-700/30 p-2 rounded">
+                Receita: 500 Alumínio, 500 Borracha
+              </div>
+              <div className="flex space-x-2">
+                <Badge
+                  variant="secondary"
+                  className="bg-green-600/20 text-green-400 border-green-600/30"
+                >
+                  Aliado: {formatCurrency(pricing.NOTEBOOK.ally)}
+                </Badge>
+                <Badge
+                  variant="secondary"
+                  className="bg-red-600/20 text-red-400 border-red-600/30"
+                >
+                  Não-aliado: {formatCurrency(pricing.NOTEBOOK.nonAlly)}
+                </Badge>
+              </div>
+            </div>
           </CardContent>
         </Card>
 
@@ -184,7 +234,7 @@ export function CraftingCalculator() {
                 <div className="flex justify-between">
                   <span>Total de Itens:</span>
                   <span className="font-medium">
-                    {coleteQuantity + trojanQuantity}
+                    {coleteQuantity + trojanQuantity + notebookQuantity}
                   </span>
                 </div>
                 <div className="flex justify-between">
@@ -416,6 +466,59 @@ export function CraftingCalculator() {
                       <span className="text-red-400 font-medium">
                         {formatCurrency(
                           trojanQuantity * pricing.TROJAN.nonAlly,
+                        )}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {notebookQuantity > 0 && (
+                <div className="space-y-3 p-4 bg-gray-700/30 rounded-lg border border-gray-600/50">
+                  <h4 className="font-semibold text-lg text-white flex items-center space-x-2">
+                    <span>💻</span>
+                    <span>NOTEBOOK × {notebookQuantity}</span>
+                  </h4>
+                  <div className="space-y-2 text-sm">
+                    <div className="flex justify-between text-gray-300">
+                      <span>Alumínio:</span>
+                      <span>
+                        {notebookQuantity} × 500 ={' '}
+                        <span className="text-blue-400 font-medium">
+                          {notebookQuantity * 500}
+                        </span>
+                      </span>
+                    </div>
+                    <div className="flex justify-between text-gray-300">
+                      <span>Borracha:</span>
+                      <span>
+                        {notebookQuantity} × 500 ={' '}
+                        <span className="text-green-400 font-medium">
+                          {notebookQuantity * 500}
+                        </span>
+                      </span>
+                    </div>
+                    <div className="flex justify-between text-gray-300">
+                      <span>Roupas:</span>
+                      <span>
+                        {notebookQuantity} × 0 ={' '}
+                        <span className="text-purple-400 font-medium">0</span>
+                      </span>
+                    </div>
+                    <Separator className="bg-gray-600" />
+                    <div className="flex justify-between text-gray-300">
+                      <span>Valor Aliado:</span>
+                      <span className="text-green-400 font-medium">
+                        {formatCurrency(
+                          notebookQuantity * pricing.NOTEBOOK.ally,
+                        )}
+                      </span>
+                    </div>
+                    <div className="flex justify-between text-gray-300">
+                      <span>Valor Não-Aliado:</span>
+                      <span className="text-red-400 font-medium">
+                        {formatCurrency(
+                          notebookQuantity * pricing.NOTEBOOK.nonAlly,
                         )}
                       </span>
                     </div>
