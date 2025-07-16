@@ -32,9 +32,11 @@ export function Order() {
   const [orderColeteQty, setOrderColeteQty] = useState(0)
   const [orderTrojanQty, setOrderTrojanQty] = useState(0)
   const [orderNotebookQty, setOrderNotebookQty] = useState(0)
-  const [orderBuyerType, setOrderBuyerType] = useState<
-    'ally' | 'nonAlly' | 'roupas'
-  >('ally')
+  const [orderBuyerType, setOrderBuyerType] = useState<'ally' | 'nonAlly'>(
+    'ally',
+  )
+  const [isDonatingClothes, setIsDonatingClothes] = useState(false)
+  const [orderDonatedClothes, setOrderDonatedClothes] = useState(0)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [orderMessage, setOrderMessage] = useState('')
 
@@ -58,7 +60,7 @@ export function Order() {
   }
 
   const calculateOrderTotal = () => {
-    const isAllyType = orderBuyerType !== 'nonAlly'
+    const isAllyType = orderBuyerType === 'ally'
     const coletePrice = isAllyType
       ? pricing.COLETE.ally
       : pricing.COLETE.nonAlly
@@ -69,11 +71,16 @@ export function Order() {
       ? pricing.NOTEBOOK.ally
       : pricing.NOTEBOOK.nonAlly
 
-    return (
+    const total =
       orderColeteQty * coletePrice +
       orderTrojanQty * trojanPrice +
       orderNotebookQty * notebookPrice
-    )
+
+    const discount = isDonatingClothes
+      ? Math.floor(orderDonatedClothes / 10) * 500
+      : 0
+
+    return Math.max(0, total - discount)
   }
 
   const generateOrderMessage = () => {
@@ -108,9 +115,13 @@ export function Order() {
     if (orderNotebookQty > 0) msg += `💻 ${orderNotebookQty}x Notebook(s)\n`
     msg += `\n💰 Total: ${formatCurrency(total)}`
     if (orderBuyerType === 'ally') msg += ' (mimos d ally 😋)'
-    else if (orderBuyerType === 'roupas')
-      msg += ' (ganhou mimos pq deu roupas 👕)'
     else msg += ' (n é d casa n tem mimo 😼)'
+
+    if (isDonatingClothes && orderDonatedClothes >= 10) {
+      msg += ` + ganhou desconto pq deu roupas 👕 (-${
+        Math.floor(orderDonatedClothes / 10) * 500
+      })`
+    }
     msg += '\n```'
 
     return msg
@@ -265,52 +276,71 @@ export function Order() {
             </div>
 
             <div className="flex space-x-4">
-              <label className="flex items-center space-x-2 cursor-pointer">
-                <input
-                  type="radio"
-                  name="buyerType"
-                  value="ally"
-                  checked={orderBuyerType === 'ally'}
-                  onChange={(e) =>
-                    setOrderBuyerType(
-                      e.target.value as 'ally' | 'nonAlly' | 'roupas',
-                    )
-                  }
-                  className="text-green-500"
-                />
-                <span className="text-green-400">Aliado</span>
-              </label>
-              <label className="flex items-center space-x-2 cursor-pointer">
-                <input
-                  type="radio"
-                  name="buyerType"
-                  value="nonAlly"
-                  checked={orderBuyerType === 'nonAlly'}
-                  onChange={(e) =>
-                    setOrderBuyerType(
-                      e.target.value as 'ally' | 'nonAlly' | 'roupas',
-                    )
-                  }
-                  className="text-red-500"
-                />
-                <span className="text-red-400">Não-Aliado</span>
-              </label>
-              <label className="flex items-center space-x-2 cursor-pointer">
-                <input
-                  type="radio"
-                  name="buyerType"
-                  value="roupas"
-                  checked={orderBuyerType === 'roupas'}
-                  onChange={(e) =>
-                    setOrderBuyerType(
-                      e.target.value as 'ally' | 'nonAlly' | 'roupas',
-                    )
-                  }
-                  className="text-yellow-500"
-                />
-                <span className="text-yellow-400">Dando Roupas</span>
-              </label>
+              <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-4 space-y-2 sm:space-y-0">
+                <label className="flex items-center space-x-2 cursor-pointer">
+                  <input
+                    type="radio"
+                    name="buyerType"
+                    value="ally"
+                    checked={orderBuyerType === 'ally'}
+                    onChange={() => setOrderBuyerType('ally')}
+                    className="text-green-500"
+                  />
+                  <span className="text-green-400">Aliado</span>
+                </label>
+                <label className="flex items-center space-x-2 cursor-pointer">
+                  <input
+                    type="radio"
+                    name="buyerType"
+                    value="nonAlly"
+                    checked={orderBuyerType === 'nonAlly'}
+                    onChange={() => setOrderBuyerType('nonAlly')}
+                    className="text-red-500"
+                  />
+                  <span className="text-red-400">Não-Aliado</span>
+                </label>
+                <label className="flex items-center space-x-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={isDonatingClothes}
+                    onChange={(e) => setIsDonatingClothes(e.target.checked)}
+                    className="text-yellow-500"
+                  />
+                  <span className="text-yellow-400">Dando Roupas</span>
+                </label>
+              </div>
             </div>
+
+            {isDonatingClothes && (
+              <div className="space-y-2">
+                <Label
+                  htmlFor="orderDonatedClothes"
+                  className="text-white font-medium"
+                >
+                  Quantidade de Roupas Doadas
+                </Label>
+                <Input
+                  id="orderDonatedClothes"
+                  type="number"
+                  min="0"
+                  value={orderDonatedClothes}
+                  onChange={(e) =>
+                    setOrderDonatedClothes(
+                      Math.max(0, Number(e.target.value) || 0),
+                    )
+                  }
+                  placeholder="0"
+                  className="bg-gray-700/50 border-gray-600 text-white placeholder:text-gray-400"
+                />
+                {orderDonatedClothes >= 10 && (
+                  <div className="text-sm text-yellow-300">
+                    Desconto aplicado: -$
+                    {Math.floor(orderDonatedClothes / 10) * 500} (
+                    {Math.floor(orderDonatedClothes / 10) * 10} roupas)
+                  </div>
+                )}
+              </div>
+            )}
 
             {(orderColeteQty > 0 || orderTrojanQty > 0) && (
               <div className="p-4 bg-gradient-to-r from-blue-600/20 to-purple-600/20 rounded-lg border border-blue-500/30">
@@ -334,9 +364,15 @@ export function Order() {
                         (Preço Aliado)
                       </span>
                     )}
-                    {orderBuyerType === 'roupas' && (
-                      <span className="text-sm text-yellow-400 ml-2">
-                        (Preço com Roupas)
+                    {orderBuyerType === 'nonAlly' && (
+                      <span className="text-sm text-red-400 ml-2">
+                        (Preço Não-Aliado)
+                      </span>
+                    )}
+                    {isDonatingClothes && orderDonatedClothes >= 10 && (
+                      <span className="text-sm text-yellow-300 ml-2">
+                        (-R${Math.floor(orderDonatedClothes / 10) * 500} de
+                        desconto por roupas)
                       </span>
                     )}
                   </div>
@@ -386,8 +422,18 @@ export function Order() {
                 <span className="text-green-400 font-semibold">
                   {formatCurrency(calculateOrderTotal())}
                 </span>{' '}
-                <span className="text-sm text-green-400">
-                  ({orderBuyerType === 'roupas' ? 'Roupas 👕' : 'Aliado 🤝'})
+                <span
+                  className={`text-sm ${
+                    orderBuyerType === 'ally'
+                      ? 'text-green-400'
+                      : 'text-red-400'
+                  }`}
+                >
+                  {orderBuyerType === 'ally'
+                    ? '(Preço Aliado)'
+                    : orderBuyerType === 'nonAlly'
+                      ? '(Preço Não-Aliado)'
+                      : ''}
                 </span>
               </div>
             </div>

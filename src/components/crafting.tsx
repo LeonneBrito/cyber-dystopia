@@ -19,6 +19,7 @@ export function CraftingCalculator() {
   const [coleteQuantity, setColeteQuantity] = useState(0)
   const [trojanQuantity, setTrojanQuantity] = useState(0)
   const [notebookQuantity, setNotebookQuantity] = useState(0)
+  const [donatedClothes, setDonatedClothes] = useState(0)
 
   const totalAluminum =
     coleteQuantity * recipes.COLETE.aluminum +
@@ -44,6 +45,10 @@ export function CraftingCalculator() {
     coleteQuantity * pricing.COLETE.nonAlly +
     trojanQuantity * pricing.TROJAN.nonAlly +
     notebookQuantity * pricing.NOTEBOOK.nonAlly
+
+  const donationDiscount = Math.floor(donatedClothes / 10) * 500
+  const allyTotalWithDiscount = Math.max(0, allyTotal - donationDiscount)
+  const nonAllyTotalWithDiscount = Math.max(0, nonAllyTotal - donationDiscount)
 
   const handleColeteChange = (value: string) => {
     const num = Number.parseInt(value) || 0
@@ -259,6 +264,33 @@ export function CraftingCalculator() {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <Label
+                htmlFor="donatedClothes"
+                className="text-white font-medium"
+              >
+                Quantidade de Roupas Doadas
+              </Label>
+              <Input
+                id="donatedClothes"
+                type="number"
+                min="0"
+                value={donatedClothes}
+                onChange={(e) =>
+                  setDonatedClothes(
+                    Math.max(0, Number.parseInt(e.target.value) || 0),
+                  )
+                }
+                placeholder="0"
+                className="text-lg bg-gray-700/50 border-gray-600 text-white placeholder:text-gray-400 focus:border-blue-500 focus:ring-blue-500"
+              />
+              {donationDiscount > 0 && (
+                <div className="text-sm text-yellow-300">
+                  Desconto aplicado: -{formatCurrency(donationDiscount)} (
+                  {Math.floor(donatedClothes / 10) * 10} roupas)
+                </div>
+              )}
+            </div>
             <div className="space-y-4">
               <div className="p-4 bg-gradient-to-r from-green-600/20 to-emerald-500/20 rounded-lg border border-green-500/30">
                 <div className="flex items-center justify-between mb-2">
@@ -271,7 +303,7 @@ export function CraftingCalculator() {
                   <Badge className="bg-green-600 text-white">-20%</Badge>
                 </div>
                 <div className="text-3xl font-bold text-green-400">
-                  {formatCurrency(allyTotal)}
+                  {formatCurrency(allyTotalWithDiscount)}
                 </div>
                 {(coleteQuantity > 0 || trojanQuantity > 0) && (
                   <div className="text-sm text-green-300/80 mt-2 space-y-1">
@@ -304,7 +336,7 @@ export function CraftingCalculator() {
                   <Badge className="bg-red-600 text-white">Padrão</Badge>
                 </div>
                 <div className="text-3xl font-bold text-red-400">
-                  {formatCurrency(nonAllyTotal)}
+                  {formatCurrency(nonAllyTotalWithDiscount)}
                 </div>
                 {(coleteQuantity > 0 || trojanQuantity > 0) && (
                   <div className="text-sm text-red-300/80 mt-2 space-y-1">
@@ -339,12 +371,15 @@ export function CraftingCalculator() {
                     </span>
                   </div>
                   <div className="text-lg font-bold text-yellow-400">
-                    {formatCurrency(nonAllyTotal - allyTotal)}
+                    {formatCurrency(
+                      nonAllyTotalWithDiscount - allyTotalWithDiscount,
+                    )}
                   </div>
                   <div className="text-xs text-yellow-300/80">
                     Economize{' '}
                     {(
-                      ((nonAllyTotal - allyTotal) / nonAllyTotal) *
+                      ((nonAllyTotalWithDiscount - allyTotalWithDiscount) /
+                        nonAllyTotalWithDiscount) *
                       100
                     ).toFixed(1)}
                     % com preço de aliado
