@@ -3,10 +3,8 @@ export const gangs: { [key: string]: string } = {
   angels: 'Angels of Death',
   'santa muerte': 'La Santa Muerte',
   insanos: 'Insanos',
-  'black eagles': 'Black Eagles',
   infamous: 'Infamous',
   ballas: 'Ballas',
-  '18block': '18Block',
   hustlers: 'Hustlers',
   'black rose': 'Black Rose',
   cesarini: 'Cesarini',
@@ -18,4 +16,5 @@ export const gangs: { [key: string]: string } = {
   roots: 'Roots Crew',
   stl: 'STL',
   mib: 'MIB',
+  bandoleros: 'Bandoleros',
 }
