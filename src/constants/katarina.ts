@@ -10,12 +10,12 @@ export const allyMessages = [
       'gemte jaketa do true religiom do falesido NAO VAMOS CITAR O nome dese rapas disem que dar 7 mil anos d asar 🤔 😰 😰  #truereligion eles tem bao gosto pra artismo 😋',
       'to #anotamdo... pedirao... eeehrr.... 🤔 ... uma brusinha de MIATINHA 😱 😱 😱 😱 😱 😱 😱 😱  eu AMO #ESSESRAPASESEUVODARDISCONTOPRAELESTAPESSOALESPEROQUEAGEMTENAOPERDAMUITODINHEIRO',
     ],
-    pendrive: [
-      'gemte #pedirao um usb da semrie do arcame 😚 e falarao q iam pedir mais do breakimg beds ☝️ 🥺  eles sao muto culto',
-      'pedirao video aula 😥  de beija na boca 😥  nao sei se gostei mas ta bao ... sEJE FELISES ne 😁 👍',
-      'mais pemdrive de lol 2 saino quemtinho rapases 🫶 🫶 😱',
-      'pedirao xit de cambio no habbo hOTEL VAMOgurises 😋',
-      'a noit escuta 6 toks no meu motolora 😚  mais chips pesoal 😱 pro nosso amigOES',
+    celular: [
+      'gemte pedirao o CELULAR rosa do butterfly 😱  e falou "i love you" pra mim eu chorei 🥺',
+      'o cara me ligo no celular descartavel e tocou musiquinha da barbie 🤔  eu amei 😍',
+      'mandaro um CELULAR de brinquedo pra pista 😁  mas e de guerra mesmo kkkk',
+      'coloquei chip no celular descartavel e começou a tocar linkin park do nada 😰',
+      'esse celular e tao descartavel que eu joguei ele no lixo e ele volto 😱',
     ],
   },
 ]
@@ -36,12 +36,12 @@ export const nonAllyMessages = [
       ' 👿  ME TRATARAO MAL NAO GOSTEI . EU COSPIR NO COLETE DESSES RAPASES . TUDO D BAO PA ELES MAS EU ESPERO MUITO Q ELES SOFRAO UM #acidenteautomobilisticoemquenenhumdelessobreviveraieuficareibemfelis 😚 ',
       'eu .... axo q apertei um numero errado 😱 memtira t emganei HAHAHAHAHAHAHAHAHAHA eu detesto esses caras, mano.',
     ],
-    pendrive: [
-      'ele pedio o jogo trojao i eu ☝️ 😁  dise meu pau na sua 🫵 maos i ele nao riu 😥 ai eu fiquei tristg 🥺',
-      'pedirao hemtai . 😰  muito feio podi dar baminemto da loja? 🥺  po favor',
-      'ele pedio league of legemds 2 krakeado e achei disrespeitoso 😰  nnao pod krakea empresa indies 😥',
-      'xamou pro x1 no cs:go i perdeu emtao vo cobra mai caro mesmo 😋  ruim podi lixo merda cu bosta pimto mijo ! 😁 👍 ',
-      'pedi pa camta uma musicas pra mi i nao camtou . emtao foda se essa bosta . 🖕',
+    celular: [
+      'pediro um celular descartavel mas disse q era p ligar pra minha mae... mas minha mae ta morta 😐',
+      'mandei celular rosa e ele reclamo pq nao vinha com ringtone do butterfly 🦋',
+      'queria celular de guerra mas ganhou um q toca polyphonic do crazy frog 😋',
+      'liguei no celular descartavel e falei "alo quem fala" e a pessoa disse "desliga sua mao fedida" 😰',
+      'celular descartavel caiu no chao e desmontou em 8 pecas 🤔  normal',
     ],
   },
 ]

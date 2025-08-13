@@ -11,4 +11,8 @@ export const pricing = {
     ally: 10000,
     nonAlly: 12000,
   },
+  CELULAR_DESCARTAVEL: {
+    ally: 2500,
+    nonAlly: 3000,
+  },
 }

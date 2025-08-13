@@ -30,8 +30,7 @@ export function Order() {
     new Date().toISOString().split('T')[0],
   )
   const [orderColeteQty, setOrderColeteQty] = useState(0)
-  const [orderTrojanQty, setOrderTrojanQty] = useState(0)
-  const [orderNotebookQty, setOrderNotebookQty] = useState(0)
+  const [orderCelularQty, setOrderCelularQty] = useState(0)
   const [orderBuyerType, setOrderBuyerType] = useState<'ally' | 'nonAlly'>(
     'ally',
   )
@@ -64,17 +63,13 @@ export function Order() {
     const coletePrice = isAllyType
       ? pricing.COLETE.ally
       : pricing.COLETE.nonAlly
-    const trojanPrice = isAllyType
-      ? pricing.TROJAN.ally
-      : pricing.TROJAN.nonAlly
-    const notebookPrice = isAllyType
-      ? pricing.NOTEBOOK.ally
-      : pricing.NOTEBOOK.nonAlly
+    const celularPrice = isAllyType
+      ? pricing.CELULAR_DESCARTAVEL.ally
+      : pricing.CELULAR_DESCARTAVEL.nonAlly
 
     const total =
       orderColeteQty * coletePrice +
-      orderTrojanQty * trojanPrice +
-      orderNotebookQty * notebookPrice
+      orderCelularQty * celularPrice
 
     const discount = isDonatingClothes
       ? Math.floor(orderDonatedClothes / 10) * 500
@@ -86,22 +81,21 @@ export function Order() {
   const generateOrderMessage = () => {
     const total = calculateOrderTotal()
     const formattedDate = formatBrazilianDate(orderDate)
-
-    let intro = ''
     const isAllyType = orderBuyerType !== 'nonAlly'
 
+    let intro = ''
     if (isAllyType) {
       const intros = [
         ...allyMessages[0].all,
         ...(orderColeteQty > 0 ? allyMessages[0].colete : []),
-        ...(orderTrojanQty > 0 ? allyMessages[0].pendrive : []),
+        ...(orderCelularQty > 0 ? allyMessages[0].celular : []),
       ]
       intro = getRandomElement(intros)
     } else {
       const intros = [
         ...nonAllyMessages[0].all,
         ...(orderColeteQty > 0 ? nonAllyMessages[0].colete : []),
-        ...(orderTrojanQty > 0 ? nonAllyMessages[0].pendrive : []),
+        ...(orderCelularQty > 0 ? nonAllyMessages[0].celular : []),
       ]
       intro = getRandomElement(intros)
     }
@@ -111,8 +105,7 @@ export function Order() {
     msg += `🧾 Encomenda: ${orderGangName}\n`
     msg += `📅 Data: ${formattedDate}\n`
     if (orderColeteQty > 0) msg += `🛡️ ${orderColeteQty}x Colete(s)\n`
-    if (orderTrojanQty > 0) msg += `💣 ${orderTrojanQty}x Trojan(s)\n`
-    if (orderNotebookQty > 0) msg += `💻 ${orderNotebookQty}x Notebook(s)\n`
+    if (orderCelularQty > 0) msg += `📱 ${orderCelularQty}x Celular Descartável\n`
     msg += `\n💰 Total: ${formatCurrency(total)}`
     if (orderBuyerType === 'ally') msg += ' (mimos d ally 😋)'
     else msg += ' (n é d casa n tem mimo 😼)'
@@ -134,7 +127,6 @@ export function Order() {
     }
 
     const selectedWebhookUrl = getWebhookUrl()
-
     if (!selectedWebhookUrl) {
       toast.error(
         `Webhook do Discord para ${
@@ -159,7 +151,7 @@ export function Order() {
         toast.success('Encomenda enviada com sucesso para o Discord!')
         setOrderGangName('')
         setOrderColeteQty(0)
-        setOrderTrojanQty(0)
+        setOrderCelularQty(0)
         setOrderDate(new Date().toISOString().split('T')[0])
       } else {
         throw new Error('Erro ao enviar para o Discord')
@@ -173,306 +165,273 @@ export function Order() {
   }
 
   return (
-    <>
-      <div className="grid lg:grid-cols-2 gap-6">
-        {/* Card da Encomenda */}
-        <Card className="bg-gray-800/50 border-gray-700 backdrop-blur-sm">
-          <CardHeader>
-            <CardTitle className="text-white flex items-center space-x-2">
-              <span className="text-xl">📝</span>
-              <span>Criar Encomenda</span>
-            </CardTitle>
-            <CardDescription className="text-gray-400">
-              Preencha os dados da encomenda
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="gangName" className="text-white font-medium">
-                Nome da Gang
-              </Label>
-              <Select
-                value={orderGangName}
-                onValueChange={(value) => setOrderGangName(value)}
-              >
-                <SelectTrigger className="bg-gray-700/50 border-gray-600 text-white w-full">
-                  <SelectValue placeholder="Selecione uma gang" />
-                </SelectTrigger>
-                <SelectContent className="bg-gray-800 text-white border-gray-600">
-                  {Object.entries(gangs).map(([key, label]) => (
-                    <SelectItem key={key} value={label} className="capitalize">
-                      {label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+    <div className="grid lg:grid-cols-2 gap-6">
+      {/* Card da Encomenda */}
+      <Card className="bg-gray-800/50 border-gray-700 backdrop-blur-sm">
+        <CardHeader>
+          <CardTitle className="text-white flex items-center space-x-2">
+            <span className="text-xl">📝</span>
+            <span>Criar Encomenda</span>
+          </CardTitle>
+          <CardDescription className="text-gray-400">
+            Preencha os dados da encomenda
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="gangName" className="text-white font-medium">
+              Nome da Gang
+            </Label>
+            <Select
+              value={orderGangName}
+              onValueChange={(value) => setOrderGangName(value)}
+            >
+              <SelectTrigger className="bg-gray-700/50 border-gray-600 text-white w-full">
+                <SelectValue placeholder="Selecione uma gang" />
+              </SelectTrigger>
+              <SelectContent className="bg-gray-800 text-white border-gray-600">
+                {Object.entries(gangs).map(([key, label]) => (
+                  <SelectItem key={key} value={label} className="capitalize">
+                    {label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
 
+          <div className="space-y-2">
+            <Label htmlFor="orderDate" className="text-white font-medium">
+              Data da Encomenda
+            </Label>
+            <Input
+              id="orderDate"
+              type="date"
+              value={orderDate}
+              onChange={(e) => setOrderDate(e.target.value)}
+              className="bg-gray-700/50 border-gray-600 text-white"
+            />
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="orderDate" className="text-white font-medium">
-                Data da Encomenda
+              <Label htmlFor="orderColete" className="text-white font-medium">
+                Coletes
               </Label>
               <Input
-                id="orderDate"
-                type="date"
-                value={orderDate}
-                onChange={(e) => setOrderDate(e.target.value)}
-                className="bg-gray-700/50 border-gray-600 text-white"
+                id="orderColete"
+                type="number"
+                min="0"
+                value={orderColeteQty}
+                onChange={(e) =>
+                  setOrderColeteQty(Number(e.target.value) || 0)
+                }
+                placeholder="0"
+                className="bg-gray-700/50 border-gray-600 text-white placeholder:text-gray-400"
               />
             </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="orderColete" className="text-white font-medium">
-                  Coletes
-                </Label>
-                <Input
-                  id="orderColete"
-                  type="number"
-                  min="0"
-                  value={orderColeteQty}
-                  onChange={(e) =>
-                    setOrderColeteQty(Number(e.target.value) || 0)
-                  }
-                  placeholder="0"
-                  className="bg-gray-700/50 border-gray-600 text-white placeholder:text-gray-400"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="orderTrojan" className="text-white font-medium">
-                  Trojans
-                </Label>
-                <Input
-                  id="orderTrojan"
-                  type="number"
-                  min="0"
-                  value={orderTrojanQty}
-                  onChange={(e) =>
-                    setOrderTrojanQty(Number(e.target.value) || 0)
-                  }
-                  placeholder="0"
-                  className="bg-gray-700/50 border-gray-600 text-white placeholder:text-gray-400"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label
-                  htmlFor="orderNotebook"
-                  className="text-white font-medium"
-                >
-                  Notebooks
-                </Label>
-                <Input
-                  id="orderNotebook"
-                  type="number"
-                  min="0"
-                  value={orderNotebookQty}
-                  onChange={(e) =>
-                    setOrderNotebookQty(Number(e.target.value) || 0)
-                  }
-                  placeholder="0"
-                  className="bg-gray-700/50 border-gray-600 text-white placeholder:text-gray-400"
-                />
-              </div>
+            <div className="space-y-2">
+              <Label htmlFor="orderCelular" className="text-white font-medium">
+                Celulares Descartáveis
+              </Label>
+              <Input
+                id="orderCelular"
+                type="number"
+                min="0"
+                value={orderCelularQty}
+                onChange={(e) =>
+                  setOrderCelularQty(Number(e.target.value) || 0)
+                }
+                placeholder="0"
+                className="bg-gray-700/50 border-gray-600 text-white placeholder:text-gray-400"
+              />
             </div>
+          </div>
 
-            <div className="flex space-x-4">
-              <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-4 space-y-2 sm:space-y-0">
-                <label className="flex items-center space-x-2 cursor-pointer">
-                  <input
-                    type="radio"
-                    name="buyerType"
-                    value="ally"
-                    checked={orderBuyerType === 'ally'}
-                    onChange={() => setOrderBuyerType('ally')}
-                    className="text-green-500"
-                  />
-                  <span className="text-green-400">Aliado</span>
-                </label>
-                <label className="flex items-center space-x-2 cursor-pointer">
-                  <input
-                    type="radio"
-                    name="buyerType"
-                    value="nonAlly"
-                    checked={orderBuyerType === 'nonAlly'}
-                    onChange={() => setOrderBuyerType('nonAlly')}
-                    className="text-red-500"
-                  />
-                  <span className="text-red-400">Não-Aliado</span>
-                </label>
-                <label className="flex items-center space-x-2 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={isDonatingClothes}
-                    onChange={(e) => setIsDonatingClothes(e.target.checked)}
-                    className="text-yellow-500"
-                  />
-                  <span className="text-yellow-400">Dando Roupas</span>
-                </label>
-              </div>
+          <div className="flex space-x-4">
+            <label className="flex items-center space-x-2 cursor-pointer">
+              <input
+                type="radio"
+                name="buyerType"
+                value="ally"
+                checked={orderBuyerType === 'ally'}
+                onChange={() => setOrderBuyerType('ally')}
+                className="text-green-500"
+              />
+              <span className="text-green-400">Aliado</span>
+            </label>
+            <label className="flex items-center space-x-2 cursor-pointer">
+              <input
+                type="radio"
+                name="buyerType"
+                value="nonAlly"
+                checked={orderBuyerType === 'nonAlly'}
+                onChange={() => setOrderBuyerType('nonAlly')}
+                className="text-red-500"
+              />
+              <span className="text-red-400">Não-Aliado</span>
+            </label>
+            <label className="flex items-center space-x-2 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={isDonatingClothes}
+                onChange={(e) => setIsDonatingClothes(e.target.checked)}
+                className="text-yellow-500"
+              />
+              <span className="text-yellow-400">Dando Roupas</span>
+            </label>
+          </div>
+
+          {isDonatingClothes && (
+            <div className="space-y-2">
+              <Label
+                htmlFor="orderDonatedClothes"
+                className="text-white font-medium"
+              >
+                Quantidade de Roupas Doadas
+              </Label>
+              <Input
+                id="orderDonatedClothes"
+                type="number"
+                min="0"
+                value={orderDonatedClothes}
+                onChange={(e) =>
+                  setOrderDonatedClothes(
+                    Math.max(0, Number(e.target.value) || 0),
+                  )
+                }
+                placeholder="0"
+                className="bg-gray-700/50 border-gray-600 text-white placeholder:text-gray-400"
+              />
+              {orderDonatedClothes >= 10 && (
+                <div className="text-sm text-yellow-300">
+                  Desconto aplicado: -$
+                  {Math.floor(orderDonatedClothes / 10) * 500} (
+                  {Math.floor(orderDonatedClothes / 10) * 10} roupas)
+                </div>
+              )}
             </div>
+          )}
 
-            {isDonatingClothes && (
-              <div className="space-y-2">
-                <Label
-                  htmlFor="orderDonatedClothes"
-                  className="text-white font-medium"
-                >
-                  Quantidade de Roupas Doadas
-                </Label>
-                <Input
-                  id="orderDonatedClothes"
-                  type="number"
-                  min="0"
-                  value={orderDonatedClothes}
-                  onChange={(e) =>
-                    setOrderDonatedClothes(
-                      Math.max(0, Number(e.target.value) || 0),
-                    )
-                  }
-                  placeholder="0"
-                  className="bg-gray-700/50 border-gray-600 text-white placeholder:text-gray-400"
-                />
-                {orderDonatedClothes >= 10 && (
-                  <div className="text-sm text-yellow-300">
-                    Desconto aplicado: -$
-                    {Math.floor(orderDonatedClothes / 10) * 500} (
-                    {Math.floor(orderDonatedClothes / 10) * 10} roupas)
-                  </div>
+          {(orderColeteQty > 0 || orderCelularQty > 0) && (
+            <div className="p-4 bg-gradient-to-r from-blue-600/20 to-purple-600/20 rounded-lg border border-blue-500/30">
+              <div className="text-sm text-gray-300 space-y-2">
+                <div className="font-medium text-white mb-2">
+                  Resumo da Encomenda:
+                </div>
+                {orderColeteQty > 0 && (
+                  <div>• {orderColeteQty} Colete(s)</div>
                 )}
-              </div>
-            )}
-
-            {(orderColeteQty > 0 || orderTrojanQty > 0) && (
-              <div className="p-4 bg-gradient-to-r from-blue-600/20 to-purple-600/20 rounded-lg border border-blue-500/30">
-                <div className="text-sm text-gray-300 space-y-2">
-                  <div className="font-medium text-white mb-2">
-                    Resumo da Encomenda:
-                  </div>
-                  {orderColeteQty > 0 && (
-                    <div>• {orderColeteQty} Colete(s)</div>
+                {orderCelularQty > 0 && (
+                  <div>• {orderCelularQty} Celular(es) Descartável(is)</div>
+                )}
+                <div className="font-bold text-lg text-blue-400 pt-2 border-t border-gray-600">
+                  Total: {formatCurrency(calculateOrderTotal())}
+                  {orderBuyerType === 'ally' && (
+                    <span className="text-sm text-green-400 ml-2">
+                      (Preço Aliado)
+                    </span>
                   )}
-                  {orderTrojanQty > 0 && (
-                    <div>• {orderTrojanQty} Trojan(s)</div>
+                  {orderBuyerType === 'nonAlly' && (
+                    <span className="text-sm text-red-400 ml-2">
+                      (Preço Não-Aliado)
+                    </span>
                   )}
-                  {orderNotebookQty > 0 && (
-                    <div>• {orderNotebookQty} Notebook(s)</div>
+                  {isDonatingClothes && orderDonatedClothes >= 10 && (
+                    <span className="text-sm text-yellow-300 ml-2">
+                      (-R${Math.floor(orderDonatedClothes / 10) * 500} de desconto por roupas)
+                    </span>
                   )}
-                  <div className="font-bold text-lg text-blue-400 pt-2 border-t border-gray-600">
-                    Total: {formatCurrency(calculateOrderTotal())}
-                    {orderBuyerType === 'ally' && (
-                      <span className="text-sm text-green-400 ml-2">
-                        (Preço Aliado)
-                      </span>
-                    )}
-                    {orderBuyerType === 'nonAlly' && (
-                      <span className="text-sm text-red-400 ml-2">
-                        (Preço Não-Aliado)
-                      </span>
-                    )}
-                    {isDonatingClothes && orderDonatedClothes >= 10 && (
-                      <span className="text-sm text-yellow-300 ml-2">
-                        (-R${Math.floor(orderDonatedClothes / 10) * 500} de
-                        desconto por roupas)
-                      </span>
-                    )}
-                  </div>
                 </div>
               </div>
-            )}
-          </CardContent>
-        </Card>
+            </div>
+          )}
+        </CardContent>
+      </Card>
 
-        {/* Botão de envio */}
-        <Card className="bg-gray-800/50 border-gray-700 backdrop-blur-sm">
-          <CardHeader>
-            <CardTitle className="text-white flex items-center space-x-2">
-              <span className="text-xl">📤</span>
-              <span>Enviar Encomenda</span>
-            </CardTitle>
-            <CardDescription className="text-gray-400">
-              Revise e confirme os dados antes de enviar para o Discord
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4 text-sm text-gray-300">
-            <div className="bg-gray-900/50 border border-gray-700 rounded-lg p-4 space-y-2">
-              <div>
-                <strong>Gang:</strong>{' '}
-                {orderGangName || (
-                  <span className="text-red-400">[Não preenchido]</span>
-                )}
-              </div>
-
-              {orderColeteQty > 0 || orderTrojanQty > 0 ? (
-                <div>
-                  <strong>Itens:</strong>{' '}
-                  {orderColeteQty > 0 && `${orderColeteQty}x Coletes`}
-                  {orderColeteQty > 0 && orderTrojanQty > 0 && ', '}
-                  {orderTrojanQty > 0 && `${orderTrojanQty}x Trojans`}
-                  {orderNotebookQty > 0 &&
-                    orderColeteQty + orderTrojanQty > 0 &&
-                    ', '}
-                  {orderNotebookQty > 0 && `${orderNotebookQty}x Notebooks`}
-                </div>
-              ) : (
-                <div className="text-red-400">Nenhum item selecionado</div>
+      {/* Botão de envio */}
+      <Card className="bg-gray-800/50 border-gray-700 backdrop-blur-sm">
+        <CardHeader>
+          <CardTitle className="text-white flex items-center space-x-2">
+            <span className="text-xl">📤</span>
+            <span>Enviar Encomenda</span>
+          </CardTitle>
+          <CardDescription className="text-gray-400">
+            Revise e confirme os dados antes de enviar para o Discord
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4 text-sm text-gray-300">
+          <div className="bg-gray-900/50 border border-gray-700 rounded-lg p-4 space-y-2">
+            <div>
+              <strong>Gang:</strong>{' '}
+              {orderGangName || (
+                <span className="text-red-400">[Não preenchido]</span>
               )}
-
-              <div>
-                <strong>Total:</strong>{' '}
-                <span className="text-green-400 font-semibold">
-                  {formatCurrency(calculateOrderTotal())}
-                </span>{' '}
-                <span
-                  className={`text-sm ${
-                    orderBuyerType === 'ally'
-                      ? 'text-green-400'
-                      : 'text-red-400'
-                  }`}
-                >
-                  {orderBuyerType === 'ally'
-                    ? '(Preço Aliado)'
-                    : orderBuyerType === 'nonAlly'
-                      ? '(Preço Não-Aliado)'
-                      : ''}
-                </span>
-              </div>
             </div>
 
-            {orderColeteQty + orderTrojanQty > 0 && orderGangName.trim() && (
-              <div className="bg-gray-900/40 p-4 rounded-lg border border-gray-700/50 font-mono text-sm text-gray-300 whitespace-pre-line">
-                A mensagem surpresa será revelada após o envio 😉
+            {orderColeteQty > 0 || orderCelularQty > 0 ? (
+              <div>
+                <strong>Itens:</strong>{' '}
+                {orderColeteQty > 0 && `${orderColeteQty}x Coletes`}
+                {orderColeteQty > 0 && orderCelularQty > 0 && ', '}
+                {orderCelularQty > 0 && `${orderCelularQty}x Celular(es)`}
               </div>
+            ) : (
+              <div className="text-red-400">Nenhum item selecionado</div>
             )}
 
-            <button
-              onClick={handleSubmitOrder}
-              disabled={isSubmitting || !orderGangName.trim()}
-              className="w-full bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 disabled:from-gray-600 disabled:to-gray-700 disabled:cursor-not-allowed text-white font-medium py-3 px-4 rounded-lg transition-all duration-200 flex items-center justify-center space-x-2"
-            >
-              {isSubmitting ? (
-                <>
-                  <span className="animate-spin">⏳</span>
-                  <span>Enviando...</span>
-                </>
-              ) : (
-                <>
-                  <span>🚀</span>
-                  <span>Confirmar e Enviar</span>
-                </>
-              )}
-            </button>
+            <div>
+              <strong>Total:</strong>{' '}
+              <span className="text-green-400 font-semibold">
+                {formatCurrency(calculateOrderTotal())}
+              </span>{' '}
+              <span
+                className={`text-sm ${
+                  orderBuyerType === 'ally'
+                    ? 'text-green-400'
+                    : 'text-red-400'
+                }`}
+              >
+                {orderBuyerType === 'ally'
+                  ? '(Preço Aliado)'
+                  : '(Preço Não-Aliado)'}
+              </span>
+            </div>
+          </div>
 
-            {orderMessage && (
-              <div className="text-xs text-gray-500 pt-2 border-t border-gray-600/50">
-                Última mensagem enviada:
-                <pre className="mt-2 whitespace-pre-wrap font-mono text-gray-400">
-                  {orderMessage}
-                </pre>
-              </div>
+          {orderColeteQty + orderCelularQty > 0 && orderGangName.trim() && (
+            <div className="bg-gray-900/40 p-4 rounded-lg border border-gray-700/50 font-mono text-sm text-gray-300 whitespace-pre-line">
+              A mensagem surpresa será revelada após o envio 😉
+            </div>
+          )}
+
+          <button
+            onClick={handleSubmitOrder}
+            disabled={isSubmitting || !orderGangName.trim()}
+            className="w-full bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 disabled:from-gray-600 disabled:to-gray-700 disabled:cursor-not-allowed text-white font-medium py-3 px-4 rounded-lg transition-all duration-200 flex items-center justify-center space-x-2"
+          >
+            {isSubmitting ? (
+              <>
+                <span className="animate-spin">⏳</span>
+                <span>Enviando...</span>
+              </>
+            ) : (
+              <>
+                <span>🚀</span>
+                <span>Confirmar e Enviar</span>
+              </>
             )}
-          </CardContent>
-        </Card>
-      </div>
-    </>
+          </button>
+
+          {orderMessage && (
+            <div className="text-xs text-gray-500 pt-2 border-t border-gray-600/50">
+              Última mensagem enviada:
+              <pre className="mt-2 whitespace-pre-wrap font-mono text-gray-400">
+                {orderMessage}
+              </pre>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+    </div>
   )
 }

@@ -14,4 +14,9 @@ export const recipes = {
     rubber: 500,
     clothes: 0,
   },
+  CELULAR_DESCARTAVEL: {
+    aluminum: 150,
+    rubber: 150,
+    clothes: 0,
+  },
 }
