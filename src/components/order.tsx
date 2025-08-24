@@ -26,6 +26,9 @@ import { getRandomElement } from '@/utils/get-random-element'
 
 export function Order() {
   const [orderGangName, setOrderGangName] = useState('')
+  const [useManualGangName, setUseManualGangName] = useState(false)
+  const [manualGangName, setManualGangName] = useState('')
+
   const [orderDate, setOrderDate] = useState(
     new Date().toISOString().split('T')[0],
   )
@@ -46,13 +49,13 @@ export function Order() {
   const getWebhookUrl = () =>
     orderBuyerType === 'nonAlly' ? webhookUrlNonAlly : webhookUrlAlly
 
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-US', {
+  const formatCurrency = (amount: number) =>
+    new Intl.NumberFormat('en-US', {
       style: 'currency',
       currency: 'USD',
       minimumFractionDigits: 2,
     }).format(amount)
-  }
+
   const formatBrazilianDate = (dateString: string) => {
     const date = new Date(dateString + 'T00:00:00')
     return date.toLocaleDateString('pt-BR')
@@ -60,16 +63,12 @@ export function Order() {
 
   const calculateOrderTotal = () => {
     const isAllyType = orderBuyerType === 'ally'
-    const coletePrice = isAllyType
-      ? pricing.COLETE.ally
-      : pricing.COLETE.nonAlly
+    const coletePrice = isAllyType ? pricing.COLETE.ally : pricing.COLETE.nonAlly
     const celularPrice = isAllyType
       ? pricing.CELULAR_DESCARTAVEL.ally
       : pricing.CELULAR_DESCARTAVEL.nonAlly
 
-    const total =
-      orderColeteQty * coletePrice +
-      orderCelularQty * celularPrice
+    const total = orderColeteQty * coletePrice + orderCelularQty * celularPrice
 
     const discount = isDonatingClothes
       ? Math.floor(orderDonatedClothes / 10) * 500
@@ -77,6 +76,9 @@ export function Order() {
 
     return Math.max(0, total - discount)
   }
+
+  // RESOLVE NOME DA GANG (manual > select)
+  const gangName = (useManualGangName ? manualGangName : orderGangName).trim()
 
   const generateOrderMessage = () => {
     const total = calculateOrderTotal()
@@ -102,7 +104,7 @@ export function Order() {
 
     let msg = `${intro}\n\n`
     msg += '```md\n'
-    msg += `🧾 Encomenda: ${orderGangName}\n`
+    msg += `🧾 Encomenda: ${gangName}\n`
     msg += `📅 Data: ${formattedDate}\n`
     if (orderColeteQty > 0) msg += `🛡️ ${orderColeteQty}x Colete(s)\n`
     if (orderCelularQty > 0) msg += `📱 ${orderCelularQty}x Celular Descartável\n`
@@ -121,8 +123,8 @@ export function Order() {
   }
 
   const handleSubmitOrder = async () => {
-    if (!orderGangName.trim()) {
-      toast.error('Por favor, insira o nome da gang.')
+    if (!gangName) {
+      toast.error('Por favor, selecione ou insira o nome de quem está comprando.')
       return
     }
 
@@ -150,6 +152,8 @@ export function Order() {
       if (response.ok) {
         toast.success('Encomenda enviada com sucesso para o Discord!')
         setOrderGangName('')
+        setManualGangName('')
+        setUseManualGangName(false)
         setOrderColeteQty(0)
         setOrderCelularQty(0)
         setOrderDate(new Date().toISOString().split('T')[0])
@@ -178,25 +182,50 @@ export function Order() {
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
+          {/* Seleção ou Nome Manual */}
           <div className="space-y-2">
             <Label htmlFor="gangName" className="text-white font-medium">
-              Nome da Gang
+              Nome de quem está comprando
             </Label>
-            <Select
-              value={orderGangName}
-              onValueChange={(value) => setOrderGangName(value)}
-            >
-              <SelectTrigger className="bg-gray-700/50 border-gray-600 text-white w-full">
-                <SelectValue placeholder="Selecione uma gang" />
-              </SelectTrigger>
-              <SelectContent className="bg-gray-800 text-white border-gray-600">
-                {Object.entries(gangs).map(([key, label]) => (
-                  <SelectItem key={key} value={label} className="capitalize">
-                    {label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+
+            {/* Alternador manual */}
+            <div className="flex items-center gap-2">
+              <input
+                id="useManualGangName"
+                type="checkbox"
+                checked={useManualGangName}
+                onChange={(e) => setUseManualGangName(e.target.checked)}
+              />
+              <label htmlFor="useManualGangName" className="text-gray-300 text-sm">
+                Nome não está na lista (digitar manualmente)
+              </label>
+            </div>
+
+            {!useManualGangName ? (
+              <Select
+                value={orderGangName}
+                onValueChange={(value) => setOrderGangName(value)}
+              >
+                <SelectTrigger className="bg-gray-700/50 border-gray-600 text-white w-full">
+                  <SelectValue placeholder="Selecione uma gang" />
+                </SelectTrigger>
+                <SelectContent className="bg-gray-800 text-white border-gray-600">
+                  {Object.entries(gangs).map(([key, label]) => (
+                    <SelectItem key={key} value={label} className="capitalize">
+                      {label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            ) : (
+              <Input
+                id="manualGangName"
+                placeholder="Digite o nome (ex.: Cliente avulso, Fulano, etc.)"
+                value={manualGangName}
+                onChange={(e) => setManualGangName(e.target.value)}
+                className="bg-gray-700/50 border-gray-600 text-white placeholder:text-gray-400"
+              />
+            )}
           </div>
 
           <div className="space-y-2">
@@ -222,9 +251,7 @@ export function Order() {
                 type="number"
                 min="0"
                 value={orderColeteQty}
-                onChange={(e) =>
-                  setOrderColeteQty(Number(e.target.value) || 0)
-                }
+                onChange={(e) => setOrderColeteQty(Number(e.target.value) || 0)}
                 placeholder="0"
                 className="bg-gray-700/50 border-gray-600 text-white placeholder:text-gray-400"
               />
@@ -238,9 +265,7 @@ export function Order() {
                 type="number"
                 min="0"
                 value={orderCelularQty}
-                onChange={(e) =>
-                  setOrderCelularQty(Number(e.target.value) || 0)
-                }
+                onChange={(e) => setOrderCelularQty(Number(e.target.value) || 0)}
                 placeholder="0"
                 className="bg-gray-700/50 border-gray-600 text-white placeholder:text-gray-400"
               />
@@ -295,9 +320,7 @@ export function Order() {
                 min="0"
                 value={orderDonatedClothes}
                 onChange={(e) =>
-                  setOrderDonatedClothes(
-                    Math.max(0, Number(e.target.value) || 0),
-                  )
+                  setOrderDonatedClothes(Math.max(0, Number(e.target.value) || 0))
                 }
                 placeholder="0"
                 className="bg-gray-700/50 border-gray-600 text-white placeholder:text-gray-400"
@@ -318,9 +341,7 @@ export function Order() {
                 <div className="font-medium text-white mb-2">
                   Resumo da Encomenda:
                 </div>
-                {orderColeteQty > 0 && (
-                  <div>• {orderColeteQty} Colete(s)</div>
-                )}
+                {orderColeteQty > 0 && <div>• {orderColeteQty} Colete(s)</div>}
                 {orderCelularQty > 0 && (
                   <div>• {orderCelularQty} Celular(es) Descartável(is)</div>
                 )}
@@ -362,10 +383,8 @@ export function Order() {
         <CardContent className="space-y-4 text-sm text-gray-300">
           <div className="bg-gray-900/50 border border-gray-700 rounded-lg p-4 space-y-2">
             <div>
-              <strong>Gang:</strong>{' '}
-              {orderGangName || (
-                <span className="text-red-400">[Não preenchido]</span>
-              )}
+              <strong>Cliente:</strong>{' '}
+              {gangName || <span className="text-red-400">[Não preenchido]</span>}
             </div>
 
             {orderColeteQty > 0 || orderCelularQty > 0 ? (
@@ -386,19 +405,15 @@ export function Order() {
               </span>{' '}
               <span
                 className={`text-sm ${
-                  orderBuyerType === 'ally'
-                    ? 'text-green-400'
-                    : 'text-red-400'
+                  orderBuyerType === 'ally' ? 'text-green-400' : 'text-red-400'
                 }`}
               >
-                {orderBuyerType === 'ally'
-                  ? '(Preço Aliado)'
-                  : '(Preço Não-Aliado)'}
+                {orderBuyerType === 'ally' ? '(Preço Aliado)' : '(Preço Não-Aliado)'}
               </span>
             </div>
           </div>
 
-          {orderColeteQty + orderCelularQty > 0 && orderGangName.trim() && (
+          {orderColeteQty + orderCelularQty > 0 && gangName && (
             <div className="bg-gray-900/40 p-4 rounded-lg border border-gray-700/50 font-mono text-sm text-gray-300 whitespace-pre-line">
               A mensagem surpresa será revelada após o envio 😉
             </div>
@@ -406,7 +421,7 @@ export function Order() {
 
           <button
             onClick={handleSubmitOrder}
-            disabled={isSubmitting || !orderGangName.trim()}
+            disabled={isSubmitting || !gangName}
             className="w-full bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 disabled:from-gray-600 disabled:to-gray-700 disabled:cursor-not-allowed text-white font-medium py-3 px-4 rounded-lg transition-all duration-200 flex items-center justify-center space-x-2"
           >
             {isSubmitting ? (

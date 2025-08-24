@@ -14,6 +14,11 @@ export const recipes = {
     rubber: 500,
     clothes: 0,
   },
+  USB_HACKING: {
+    aluminum: 500,
+    rubber: 500,
+    clothes: 0,
+  },
   CELULAR_DESCARTAVEL: {
     aluminum: 150,
     rubber: 150,
