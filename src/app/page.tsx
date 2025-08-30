@@ -1,12 +1,7 @@
-import type { Metadata } from 'next'
-
-import { CraftingCalculator } from '@/components/crafting'
-import { Order } from '@/components/order'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-
-export const metadata: Metadata = {
-  title: 'Calculadora de Crafting',
-}
+import { CraftingCalculator } from "@/components/crafting";
+import { Order } from "@/components/order";
+import { MoneyCleaningCalculator } from "@/components/money-cleaning-calculator";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export default function Home() {
   return (
@@ -16,7 +11,7 @@ export default function Home() {
           defaultValue="calculator"
           className="w-full min-h-screen max-w-6xl mx-auto"
         >
-          <TabsList className="grid w-full grid-cols-2 bg-gray-800/50 border border-gray-700">
+          <TabsList className="grid w-full grid-cols-3 bg-gray-800/50 border border-gray-700">
             <TabsTrigger
               value="calculator"
               className="data-[state=active]:bg-gray-700 data-[state=active]:text-white text-gray-300 transition-all duration-300"
@@ -26,6 +21,7 @@ export default function Home() {
                 <span>Calculadora</span>
               </span>
             </TabsTrigger>
+
             <TabsTrigger
               value="order"
               className="data-[state=active]:bg-gray-700 data-[state=active]:text-white text-gray-300 transition-all duration-300"
@@ -33,6 +29,16 @@ export default function Home() {
               <span className="flex items-center space-x-2">
                 <span>📝</span>
                 <span>Nova Encomenda</span>
+              </span>
+            </TabsTrigger>
+
+            <TabsTrigger
+              value="wash"
+              className="data-[state=active]:bg-gray-700 data-[state=active]:text-white text-gray-300 transition-all duration-300"
+            >
+              <span className="flex items-center space-x-2">
+                <span>🧼</span>
+                <span>Conversão (Dinheiro Limpo)</span>
               </span>
             </TabsTrigger>
           </TabsList>
@@ -44,8 +50,12 @@ export default function Home() {
           <TabsContent value="order" className="space-y-6 mt-6">
             <Order />
           </TabsContent>
+
+          <TabsContent value="wash" className="space-y-6 mt-6">
+            <MoneyCleaningCalculator />
+          </TabsContent>
         </Tabs>
       </div>
     </div>
-  )
+  );
 }

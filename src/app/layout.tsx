@@ -21,7 +21,6 @@ export const metadata: Metadata = {
     template: '%s | Cyber Dystopia',
     absolute: 'Cyber Dystopia',
   },
-  description: 'Calculadora de Crafting para Cyber Dystopia',
 }
 
 export default function RootLayout({
