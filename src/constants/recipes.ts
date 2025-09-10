@@ -24,4 +24,9 @@ export const recipes = {
     rubber: 150,
     clothes: 0,
   },
+  PLACA_BALISTICA: {
+    aluminum: 10,
+    rubber: 10,
+    clothes: 0,
+  },
 }

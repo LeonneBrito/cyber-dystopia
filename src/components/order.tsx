@@ -32,8 +32,12 @@ export function Order() {
   const [orderDate, setOrderDate] = useState(
     new Date().toISOString().split('T')[0],
   )
+
+  // ===== NOVOS/ATUALIZADOS (quantidades) =====
   const [orderColeteQty, setOrderColeteQty] = useState(0)
   const [orderCelularQty, setOrderCelularQty] = useState(0)
+  const [orderPlacaQty, setOrderPlacaQty] = useState(0) // <- NOVO
+
   const [orderBuyerType, setOrderBuyerType] = useState<'ally' | 'nonAlly'>(
     'ally',
   )
@@ -67,8 +71,14 @@ export function Order() {
     const celularPrice = isAllyType
       ? pricing.CELULAR_DESCARTAVEL.ally
       : pricing.CELULAR_DESCARTAVEL.nonAlly
+    const placaPrice = isAllyType
+      ? pricing.PLACA_BALISTICA.ally
+      : pricing.PLACA_BALISTICA.nonAlly
 
-    const total = orderColeteQty * coletePrice + orderCelularQty * celularPrice
+    const total =
+      orderColeteQty * coletePrice +
+      orderCelularQty * celularPrice +
+      orderPlacaQty * placaPrice
 
     const discount = isDonatingClothes
       ? Math.floor(orderDonatedClothes / 10) * 500
@@ -77,7 +87,6 @@ export function Order() {
     return Math.max(0, total - discount)
   }
 
-  // RESOLVE NOME DA GANG (manual > select)
   const gangName = (useManualGangName ? manualGangName : orderGangName).trim()
 
   const generateOrderMessage = () => {
@@ -108,6 +117,7 @@ export function Order() {
     msg += `📅 Data: ${formattedDate}\n`
     if (orderColeteQty > 0) msg += `🛡️ ${orderColeteQty}x Colete(s)\n`
     if (orderCelularQty > 0) msg += `📱 ${orderCelularQty}x Celular Descartável\n`
+    if (orderPlacaQty > 0) msg += `🧩 ${orderPlacaQty}x Placa(s) Balística(s)\n`
     msg += `\n💰 Total: ${formatCurrency(total)}`
     if (orderBuyerType === 'ally') msg += ' (mimos d ally 😋)'
     else msg += ' (n é d casa n tem mimo 😼)'
@@ -156,6 +166,7 @@ export function Order() {
         setUseManualGangName(false)
         setOrderColeteQty(0)
         setOrderCelularQty(0)
+        setOrderPlacaQty(0)
         setOrderDate(new Date().toISOString().split('T')[0])
       } else {
         throw new Error('Erro ao enviar para o Discord')
@@ -167,6 +178,8 @@ export function Order() {
       setIsSubmitting(false)
     }
   }
+
+  const anyItemQty = orderColeteQty + orderCelularQty + orderPlacaQty > 0
 
   return (
     <div className="grid lg:grid-cols-2 gap-6">
@@ -241,7 +254,7 @@ export function Order() {
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             <div className="space-y-2">
               <Label htmlFor="orderColete" className="text-white font-medium">
                 Coletes
@@ -256,6 +269,7 @@ export function Order() {
                 className="bg-gray-700/50 border-gray-600 text-white placeholder:text-gray-400"
               />
             </div>
+
             <div className="space-y-2">
               <Label htmlFor="orderCelular" className="text-white font-medium">
                 Celulares Descartáveis
@@ -270,9 +284,24 @@ export function Order() {
                 className="bg-gray-700/50 border-gray-600 text-white placeholder:text-gray-400"
               />
             </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="orderPlaca" className="text-white font-medium">
+                Placas Balísticas
+              </Label>
+              <Input
+                id="orderPlaca"
+                type="number"
+                min="0"
+                value={orderPlacaQty}
+                onChange={(e) => setOrderPlacaQty(Number(e.target.value) || 0)}
+                placeholder="0"
+                className="bg-gray-700/50 border-gray-600 text-white placeholder:text-gray-400"
+              />
+            </div>
           </div>
 
-          <div className="flex space-x-4">
+          <div className="flex flex-wrap gap-4">
             <label className="flex items-center space-x-2 cursor-pointer">
               <input
                 type="radio"
@@ -335,7 +364,7 @@ export function Order() {
             </div>
           )}
 
-          {(orderColeteQty > 0 || orderCelularQty > 0) && (
+          {anyItemQty && (
             <div className="p-4 bg-gradient-to-r from-blue-600/20 to-purple-600/20 rounded-lg border border-blue-500/30">
               <div className="text-sm text-gray-300 space-y-2">
                 <div className="font-medium text-white mb-2">
@@ -344,6 +373,9 @@ export function Order() {
                 {orderColeteQty > 0 && <div>• {orderColeteQty} Colete(s)</div>}
                 {orderCelularQty > 0 && (
                   <div>• {orderCelularQty} Celular(es) Descartável(is)</div>
+                )}
+                {orderPlacaQty > 0 && (
+                  <div>• {orderPlacaQty} Placa(s) Balística(s)</div>
                 )}
                 <div className="font-bold text-lg text-blue-400 pt-2 border-t border-gray-600">
                   Total: {formatCurrency(calculateOrderTotal())}
@@ -387,12 +419,16 @@ export function Order() {
               {gangName || <span className="text-red-400">[Não preenchido]</span>}
             </div>
 
-            {orderColeteQty > 0 || orderCelularQty > 0 ? (
+            {anyItemQty ? (
               <div>
                 <strong>Itens:</strong>{' '}
-                {orderColeteQty > 0 && `${orderColeteQty}x Coletes`}
-                {orderColeteQty > 0 && orderCelularQty > 0 && ', '}
-                {orderCelularQty > 0 && `${orderCelularQty}x Celular(es)`}
+                {[
+                  orderColeteQty > 0 && `${orderColeteQty}x Coletes`,
+                  orderCelularQty > 0 && `${orderCelularQty}x Celular(es)`,
+                  orderPlacaQty > 0 && `${orderPlacaQty}x Placa(s) Balística(s)`,
+                ]
+                  .filter(Boolean)
+                  .join(', ')}
               </div>
             ) : (
               <div className="text-red-400">Nenhum item selecionado</div>
@@ -413,7 +449,7 @@ export function Order() {
             </div>
           </div>
 
-          {orderColeteQty + orderCelularQty > 0 && gangName && (
+          {anyItemQty && gangName && (
             <div className="bg-gray-900/40 p-4 rounded-lg border border-gray-700/50 font-mono text-sm text-gray-300 whitespace-pre-line">
               A mensagem surpresa será revelada após o envio 😉
             </div>

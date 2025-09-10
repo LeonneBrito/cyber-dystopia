@@ -1,7 +1,7 @@
 export const pricing = {
   COLETE: {
-    ally: 2000,
-    nonAlly: 2500,
+    ally: 4500,
+    nonAlly: 5000,
   },
   TROJAN: {
     ally: 3000,
@@ -18,5 +18,9 @@ export const pricing = {
   CELULAR_DESCARTAVEL: {
     ally: 2500,
     nonAlly: 3000,
+  },
+  PLACA_BALISTICA: {
+    ally: 300,
+    nonAlly: 300,
   },
 }
